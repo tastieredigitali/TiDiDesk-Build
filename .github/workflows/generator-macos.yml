@@ -145,10 +145,14 @@ jobs:
         continue-on-error: true
         if: ${{ inputs.app_version != '' }}
         shell: bash
+        env:
+          TD_APP_VERSION: ${{ inputs.app_version }}
         run: |
-          sed -i -e 's|^version = ".*"|version = "${{ inputs.app_version }}"|' ./Cargo.toml
-          sed -i '/name = "rustdesk"/ {n; s/version = ".*"/version = "${{ inputs.app_version }}"/}' ./Cargo.lock
+          # TD: perl instead of GNU sed -i, which the BSD sed of macOS rejects (Cargo.lock left behind -> cargo --locked fails)
+          perl -pi -e 's/^version = ".*"/version = "$ENV{TD_APP_VERSION}"/' ./Cargo.toml
+          perl -0pi -e 's/(name = "rustdesk"\nversion = )"[^"]*"/$1"$ENV{TD_APP_VERSION}"/' ./Cargo.lock
           grep '^version = ' ./Cargo.toml
+          grep -A1 '^name = "rustdesk"$' ./Cargo.lock
 
       - name: Apply allow_custom_update patch
         continue-on-error: true
