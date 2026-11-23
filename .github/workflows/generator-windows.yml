@@ -44,6 +44,8 @@ env:
   UPLOAD_ARTIFACT: 'true'
   SIGN_BASE_URL: "${{ secrets.SIGN_BASE_URL }}"
   STATUS_URL: "${{ secrets.GENURL }}/updategh"
+  # TD: Azure Artifact Signing, same org secrets as TD Velo / Vexa / Booking Suite; without them nothing is signed
+  ARTIFACT_SIGNING_ENDPOINT: "${{ secrets.ARTIFACT_SIGNING_ENDPOINT }}"
 
 
 jobs:
@@ -702,6 +704,25 @@ jobs:
           Remove-Item ./rustdesk/unsigned_files.zip
           Remove-Item ./rustdesk/signed_files.zip
 
+      - name: "TD: firma Azure di dll ed exe"
+        if: env.ARTIFACT_SIGNING_ENDPOINT != ''
+        uses: azure/artifact-signing-action@v2
+        with:
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          exclude-workload-identity-credential: true
+          exclude-managed-identity-credential: true
+          exclude-azure-cli-credential: true
+          endpoint: ${{ secrets.ARTIFACT_SIGNING_ENDPOINT }}
+          signing-account-name: ${{ secrets.ARTIFACT_SIGNING_ACCOUNT }}
+          certificate-profile-name: ${{ secrets.ARTIFACT_SIGNING_PROFILE }}
+          files-folder: ${{ github.workspace }}\rustdesk
+          files-folder-filter: dll,exe
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+
       - name: Create custom.txt file
         shell: bash
         run: |
@@ -775,6 +796,25 @@ jobs:
           Expand-Archive -Path ./SignOutput/signed_files.zip -DestinationPath ./SignOutput/ -Force
           Remove-Item ./SignOutput/unsigned_files.zip
           Remove-Item ./SignOutput/signed_files.zip
+
+      - name: "TD: firma Azure di exe e msi"
+        if: env.ARTIFACT_SIGNING_ENDPOINT != ''
+        uses: azure/artifact-signing-action@v2
+        with:
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          exclude-workload-identity-credential: true
+          exclude-managed-identity-credential: true
+          exclude-azure-cli-credential: true
+          endpoint: ${{ secrets.ARTIFACT_SIGNING_ENDPOINT }}
+          signing-account-name: ${{ secrets.ARTIFACT_SIGNING_ACCOUNT }}
+          certificate-profile-name: ${{ secrets.ARTIFACT_SIGNING_PROFILE }}
+          files-folder: ${{ github.workspace }}\SignOutput
+          files-folder-filter: exe,msi
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
 
       - name: rename rustdesk.exe to filename.exe
         run: |

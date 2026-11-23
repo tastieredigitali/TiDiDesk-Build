@@ -595,6 +595,10 @@ jobs:
           mkdir -p "$APP/Contents/Resources"
           echo -n '${{ env.custom }}' > "$APP/Contents/Resources/custom_.txt"
           ls -l "$APP/Contents/Resources/custom_.txt"
+          # TD: the in-place macOS updater requires CFBundleShortVersionString == the update version (e.g. 1.5.3+1)
+          if [ -n "${{ inputs.app_version }}" ]; then
+            /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString ${{ inputs.app_version }}" "$APP/Contents/Info.plist"
+          fi
       
       - name: Install rcodesign tool
         if: env.MACOS_P12_BASE64 != null

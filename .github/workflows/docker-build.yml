@@ -10,6 +10,8 @@ on:
 
 jobs:
   build:
+    # TD: the fork publishes its own image with td-docker.yml
+    if: github.repository == 'bryangerlach/rdgen'
     runs-on: ubuntu-latest
     steps:
       - name: set docker image tag
