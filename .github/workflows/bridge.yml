@@ -30,6 +30,19 @@ jobs:
               extra-build-args: "",
             }
     steps:
+      - name: "TD: versioni degli strumenti prese da RustDesk"
+        # Flutter, Rust, vcpkg... come li usa il workflow di RustDesk per questa versione, non quelli fissati da rdgen.
+        # Se il file non si scarica restano i valori di sopra.
+        shell: bash
+        env:
+          TD_RD_URL: https://raw.githubusercontent.com/rustdesk/rustdesk/${{ inputs.version }}/.github/workflows/bridge.yml
+        run: |
+          yml=$(curl -fsSL --retry 3 "$TD_RD_URL") || { echo "::warning::workflow di RustDesk non scaricato, restano le versioni di rdgen"; exit 0; }
+          for k in FLUTTER_VERSION RUST_VERSION SCITER_RUST_VERSION MAC_RUST_VERSION VCPKG_COMMIT_ID LLVM_VERSION NDK_VERSION CARGO_NDK_VERSION CARGO_EXPAND_VERSION FLUTTER_RUST_BRIDGE_VERSION; do
+            v=$(printf '%s\n' "$yml" | sed -n "s/^  $k: *\"\([A-Za-z0-9._-]*\)\".*/\1/p" | head -1)
+            if [ -n "$v" ]; then echo "$k=$v" >> "$GITHUB_ENV"; echo "$k=$v"; fi
+          done
+
       - name: Checkout source code
         if: ${{ inputs.version != 'master' }}
         uses: actions/checkout@v7
