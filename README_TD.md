@@ -1,6 +1,6 @@
 # TiDiDesk Build
 
-Repo pubblica di Tastiere Digitali che **compila soltanto** i client RustDesk personalizzati. È un fork di [bryangerlach/rdgen](https://github.com/bryangerlach/rdgen), e da lì prende ogni 6 ore gli aggiornamenti.
+Repo pubblica di Tastiere Digitali che **compila soltanto** i client RustDesk personalizzati. È nata come fork di [bryangerlach/rdgen](https://github.com/bryangerlach/rdgen), ma da TiDiDesk 1.8.0 non prende più aggiornamenti da lì: le versioni arrivano direttamente da RustDesk.
 
 - Il generatore vero (server, login, aggiornamenti dei client) sta nella repo privata `tastieredigitali/TiDiDesk`: è lui a lanciare queste build.
 - I programmi compilati **non escono da qui**: niente release e niente artifact. Ogni build li manda soltanto al server TiDiDesk, insieme al token di quella build. La configurazione arriva cifrata.
